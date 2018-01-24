@@ -8,6 +8,7 @@ ToC
 - `List of definitions`_
 - `Configurations to use`_
 - `Definitions and requirements on modification`_
+- `Support files`_
 
 List of definitions
 ******
@@ -119,4 +120,11 @@ To write roles and playbooks, following points are required to be considered.
 
 - Have version number to be installed in vars but not in task directly
 - Make dependency to other roles as less as possible, and put comment of dependency
+
+Support files
+======
+
+Folloing files are stored in "misc" directory to support non-ansible operation.
+
+- bootstrap_mhs: Installation of eups environment
 
