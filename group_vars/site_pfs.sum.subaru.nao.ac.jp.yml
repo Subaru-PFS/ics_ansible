@@ -86,7 +86,7 @@ site_config:
         home: "/var/lib/influxdb"
         shell: "/bin/false"
   virt:
-    nfsdisk: "nfsv-ics:/virt"
+    nfsdisk: "133.40.164.44:/virt"
     pki:
       local: "/virt/pki/"
       subj: "/C=US/ST=HI/L=Hilo/O=PFS"
