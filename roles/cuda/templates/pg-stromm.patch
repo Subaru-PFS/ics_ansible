@@ -1,0 +1,14 @@
+diff --git a/src/cuda_program.c b/src/cuda_program.c
+index 9254c8b..86b8b3c 100644
+--- a/src/cuda_program.c
++++ b/src/cuda_program.c
+@@ -1554,6 +1554,9 @@ build_wrapper_libraries(const char *wrapper_filename,
+ 				 "%s.sm_%lu.o",
+ 				 spath, devComputeCapability);
+ 		lib_fname = lpath;
++/* --------- */
++		setenv("PATH", "/usr/local/bin:/usr/bin:/bin", 0);
++		system("/usr/bin/env");
+ 		snprintf(cmd, sizeof(cmd),
+ 				 CUDA_BINARY_PATH "/nvcc "
+ 				 " --relocatable-device-code=true"

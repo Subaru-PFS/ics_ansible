@@ -12,7 +12,7 @@
     - { role: packages, packages: "{{ site_config.packages.utils_normalwork }}" }
     - { role: packages, packages: "{{ site_config.packages.utils_python2 }}" }
     - { role: packages, packages: "{{ site_config.packages.utils_python3 }}" }
-    - ldap
+    - ldap-client
     - { role: nfs-client, nfsv3_target: "{{ site_config.nfs.common }}" }
 
 - hosts: melco
@@ -29,7 +29,7 @@
     - "group_vars/site_{{ ansible_dns.domain }}.yml"
   roles:
     - nfs-server
-    - ldap
+    - ldap-client
 
 - hosts: pfsarch
   vars_files:
@@ -58,4 +58,21 @@
   roles:
     - { role: nfs-client, nfsv3_target: "{{ nfs_mount }}" }
     - apache
+
+- hosts: dbsrv
+  vars_files:
+    - "group_vars/site_{{ ansible_dns.domain }}.yml"
+  roles:
+    - role: mount
+      when: "local_uuids is defined"
+    - role: pgsql-server
+      when: "pgsql_server is defined"
+    - role: mysql-server
+      when: "mysql_server is defined"
+
+- hosts: cuda
+  vars_files:
+    - "group_vars/site_{{ ansible_dns.domain }}.yml"
+  roles:
+    - cuda
 

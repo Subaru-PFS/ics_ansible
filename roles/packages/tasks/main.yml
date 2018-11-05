@@ -5,11 +5,12 @@
     repo: "deb http://deb.debian.org/debian {{ ansible_lsb.codename }}-backports main contrib non-free"
     state: present
     update_cache: yes
-  when: packages_setup_backport is defined
+  when: packages_setup_backport is defined and ansible_lsb.release != 'testing'
 
 - name: Install packages via apt
   become: yes
   apt:
+    update_cache: yes
     name: "{% if item.package is defined %}{{ item.package}}{% else %}{{ item }}{% endif %}"
     state: present
   with_items: "{{ packages }}"

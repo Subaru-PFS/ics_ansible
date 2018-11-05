@@ -2,7 +2,7 @@
 - name: configure reload for apache2
   become: yes
   cron:
-    minutes: 0
+    minute: 0
     hour: 0
     day: "1,15"
     job: "systemctl reload apache2.service"
@@ -13,7 +13,7 @@
 - name: configure reload for nginx
   become: yes
   cron:
-    minutes: 0
+    minute: 0
     hour: 0
     day: "1,15"
     job: "systemctl reload nginx.service"
@@ -24,7 +24,7 @@
 - name: configure reload for postfix
   become: yes
   cron:
-    minutes: 0
+    minute: 0
     hour: 0
     day: "1,15"
     job: "systemctl reload postfix.service"
@@ -35,7 +35,7 @@
 - name: configure reload for dovecot
   become: yes
   cron:
-    minutes: 0
+    minute: 0
     hour: 0
     day: "1,15"
     job: "systemctl reload dovecot.service"

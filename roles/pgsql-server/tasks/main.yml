@@ -4,6 +4,8 @@
   register: task_psql_version
   changed_when: False
 - name: Get PostgreSQL version
+  debug:
+    msg: "Detecting PostgreSQL version"
   vars:
     task_psql_version_out_div: "{{ task_psql_version.stdout_lines[0].split(' ') }}"
     task_psql_version_full_div: "{{ task_psql_version_out_div[2].split('.') }}"
@@ -17,6 +19,13 @@
     dest: "/etc/postgresql/{{ task_psql_vars.results[0].item.psql_ver }}/main/pg_hba.conf"
     line: "host all all {{ site_config.postgres.connect_from }} md5"
   notify: restart postgresql
+- name: Create directory for database
+  become: yes
+  file:
+    path: "{{ site_config.postgres.data_directory }}"
+    state: directory
+    owner: "postgres"
+    mode: 0700
 - name: Configure server (minimum)
   become: yes
   lineinfile:
@@ -41,11 +50,23 @@
   notify: restart postgresql
 - name: Check database cluster
   become: yes
-  stat: path="{{ site_config.postgres.data_directory }}/postgresql.conf"
+  stat: path="{{ site_config.postgres.data_directory }}/postgresql.auto.conf"
   register: task_postgresql_dbc
 - name: Create database cluster if no
   become: yes
-  shell: "sudo -u postgres /usr/lib/postgresql/{{ task_psql_vars.results[0].item.psql_ver }}/bin/initdb {{ site_config.postgres.data_directory }}"
+  become_user: postgres
+  shell: "/usr/lib/postgresql/{{ task_psql_vars.results[0].item.psql_ver }}/bin/initdb {{ site_config.postgres.data_directory }}"
   when: task_postgresql_dbc.stat.md5 is not defined
   notify: restart postgresql
+- name: configure backup for pgsql
+  become: yes
+  cron:
+    minute: 0
+    hour: 7
+    job: "{{ site_config.system_dirs.git_clone }}/github.com/Subaru-PFS/pfs_infra_ipmu/admin-script/psql-backup.sh"
+    cron_file: "/etc/crontab"
+    user: postgres
+    name: backup-pgsql
+  when: install_backup_pgsql is defined
+
 

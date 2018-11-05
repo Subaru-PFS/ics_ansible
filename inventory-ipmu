@@ -3,6 +3,16 @@ all:
   children:
     hp-dl:
       children:
+        hp-dla:
+          children:
+            dlas-nonvm:
+              hosts:
+                dla1-vm:
+                dla4-vm:
+            dlas-vm:
+              hosts:
+                dla2-vm:
+                dla3-vm:
         hp-dlb:
           children:
             dlbs-nonvm:
@@ -17,29 +27,31 @@ all:
                 dlb5-vm:
                 dlb7-vm:
                 dlb8-vm:
+            dmbs-vm:
+              hosts:
+                dmb1-vm:
         hp-dlc:
           children:
-            dlcs-nonvm:
-              hosts:
-                dlc1-vm:
             dlcs-vm:
               hosts:
+                dlc1-vm:
                 dlc2-vm:
                 dlc3-vm:
                 dlc4-vm:
     virt-host:
       children:
+        dlas-vm:
         dlbs-vm:
         dlcs-vm:
+        dmbs-vm:
       hosts:
         rca1-vm:
         rca2-vm:
         rca3-vm:
         rca4-vm:
-        dla1-vm:
-        dla2-vm:
-        dla3-vm:
+        rcc1-vm:
         m3605-1a:
+        rea1-vm:
         rfa2-vm:
       vars:
         prometheus_exporters_ipmi: True
@@ -47,14 +59,6 @@ all:
       hosts:
         rsyslog:
           server_rsyslog: True
-        mgmt-dhcp:
-          server_ntp: True
-        mgmt3:
-          server_ntp: False
-          server_dnsmasq: True
-          nfsv3_target:
-              - source: "pfsdisk:/server/admin"
-                target: "/admin-res"
         influxdb:
         prometheus:
       children:
@@ -130,6 +134,54 @@ all:
                 - libtext-markdown-perl
                 - libtext-multimarkdown-perl
                 - make
+        jupyter:
+          hosts:
+            jupyter-spt:
+              jupyter:
+                directory: "/simdata/jupyter-spt/"
+                name: "jupyter-spt"
+                base_url: "/jupyter-spt/"
+                sys_path:
+                  - "/simdata/jupyter-spt//lib/"
+            jupyter1:
+              nfsv3_target:
+                - source: "pfsdisk:/server/services/jupyter"
+                  target: "/services/jupyter"
+              jupyter:
+                directory: "/services/jupyter/"
+                name: "jupyter"
+                base_url: "/internal/jupyter/"
+                kernel:
+                  ansible:
+                  javascript:
+                  ipcluster:
+                parallel:
+                  profile: "jupyter"
+        dbsrv:
+          hosts:
+            db3:
+              mysql_server:
+                mroonga: True
+              pgsql_server:
+              install_backup_mysql: True
+              install_backup_pgsql: True
+            dbsim2-spt:
+              pgsql_server:
+              local_uuids:
+                - target: "/pfsdbsim"
+                  fstype: "xfs"
+                  source: "b6241c44-797c-4efe-9ad9-3cf90bb2c911"
+                  option: "nobarrier,noatime,noexec,nodiratime"
+              local_fs:
+                - xfsprogs
+        mgmt:
+          hosts:
+            mgmt3:
+            10.100.200.1:
+          vars:
+            server_ldap: True
+            server_dnsmasq: True
+            install_backup_ldap: True
     nfssrv:
       hosts:
         sd2:
@@ -154,6 +206,7 @@ all:
         lf07:
         lf08:
         lf09:
+        lf90:
     actor:
       hosts:
         lf00-ics:
@@ -176,6 +229,11 @@ all:
           vars:
             hwraid_target_hp_p410: True
             hwraid_target_hp: True
+        dell:
+          vars:
+            hwraid_target_megasas: True
+          hosts:
+            rea1-vm:
       hosts:
         m3605-1a:
           hwraid_target_megasas: True
@@ -225,12 +283,20 @@ all:
           prometheus_exporters_snmp: True
         jirapipe-77:
           prometheus_exporters_jira: True        
-
+        dlc1-vm:
+          prometheus_exporters_nvidia_gpu: True
+        dmb1-vm:
+          prometheus_exporters_nvidia_gpu: True
+    cuda:
+      hosts:
+        dlc1-vm:
+        dmb1-vm:
+      vars:
+        packages_setup_backport: True
+        nfsv3_target:
+          - source: "simdata:/simdata"
+            target: "/simdata"
     privca:
-      hosts:
-        pd2: 
-
-    ldap:
-      hosts:
-        mgmt3:
+      children:
+        pfsdisk:
 

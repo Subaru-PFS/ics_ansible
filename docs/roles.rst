@@ -23,6 +23,8 @@ Roles are categolized into three:
 - `Roles for service configuration`_
 - `Roles for PFS configuration`_
 
+Also refer `Notes on roles development`_ for writting/modifying roles. 
+
 Roles for system configuration
 ======
 
@@ -358,6 +360,24 @@ This role will configure influxdb using data directory via NFS.
   - No retention policy initialization command. Need to initiate RP/CQ by 
     using influx client.
 
+mailman
+------
+
+This role will install mailman package, add symlink to existing data directory 
+for list configuration and data, and configure `mm_cfg.py`. Initialization 
+procedures like adding `Mailman` mail list need to be performed by manual. 
+
+- Required configuration
+
+  - `mailman_datasource`: data source directory name per target host
+    which shall include `archives/private` and `lists` directory. 
+
+- Dependencies
+
+  - Need to configure httpd first. If no, default httpd will be installed by 
+    package dependency.
+
+- No remarks
 
 nat-route
 ------
@@ -549,4 +569,20 @@ script at your home directory after logged in to bash shell.
 
   - No package is installed after running this role.
 
+Notes on roles development
+======
+
+* Keeping idempotency is **your** job, but not ansible's.
+* Debian/Ubuntu specific
+
+  * `ansible_distribution_release` could be `NA` for testing or sid etc.
+
+    * Add as 'stretch' (stable) for hw-raid.
+
+  * Use `ansible_lsb.codename` if accepts all including one for testing, like 
+    packagecloud. 
+
+* Some roles require pre-built go binary to be copied to target hosts
+
+  * Build them before running ansible, like `go get <repo>` or `go get ./...`.
 

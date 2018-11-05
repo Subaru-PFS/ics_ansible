@@ -1,0 +1,87 @@
+---
+- name: Make link to data directory
+  become: yes
+  file:
+    force: yes
+    path: "/var/lib/mailman/{{ item }}"
+    src: "{{ mailman_datasource }}/{{ item }}"
+    state: link
+  with_items:
+    - "archives/private"
+    - "lists"
+  notify: restart mailman
+- name: Configure mm_cfg
+  become: yes
+  lineinfile:
+    dest: "/etc/mailman/mm_cfg.py"
+    line: "{{ item.name }} = {{ item.value }}"
+    regexp: "^{{ item.name }} "
+  with_items:
+    - name: "DEFAULT_URL_PATTERN"
+      value: "'https://%s/mailman/'"
+    - name: "MTA"
+      value: "'Postfix'"
+    - name: "DEFAULT_ARCHIVE"
+      value: "On"
+    - name: "DEFAULT_ARCHIVE_PRIVATE"
+      value: "0"
+    - name: "DEFAULT_ARCHIVE_VOLUME_FREQUENCY"
+      value: "0"
+    - name: "SCRUBBER_USE_ATTACHMENT_FILENAME_EXTENSION"
+      value: "False"
+    - name: "DEFAULT_NEW_MEMBER_OPTIONS"
+      value: "0"
+    - name: "USER_FRIENDLY_PASSWORDS"
+      value: "No"
+    - name: "DEFAULT_LIST_ADVERTISED"
+      value: "Yes"
+    - name: "DEFAULT_MAX_NUM_RECIPIENTS"
+      value: "100"
+    - name: "DEFAULT_MAX_MESSAGE_SIZE"
+      value: "0"
+    - name: "DEFAULT_SUBJECT_PREFIX"
+      value: "'[%(real_name)s:%%05d]'"
+    - name: "DEFAULT_ADMIN_NOTIFY_MCHANGES"
+      value: "Yes"
+    - name: "DEFAULT_FORWARD_AUTO_DISCARDS"
+      value: "Yes"
+    - name: "DEFAULT_REQUEST_EXPLICIT_DESTINATION"
+      value: "No"
+    - name: "DEFAULT_REPLY_GOES_TO_LIST"
+      value: "1"
+    - name: "DEFAULT_DIGESTABLE"
+      value: "No"
+    - name: "DEFAULT_COLLAPSE_ALTERNATIVES"
+      value: "Yes"
+  notify: restart mailman
+- name: Configure mm_cfg for public mailman
+  become: yes
+  lineinfile:
+    dest: "/etc/mailman/mm_cfg.py"
+    line: "{{ item.name }} = {{ item.value }}"
+    regexp: "^{{ item.name }} "
+  with_items:
+    - name: "DEFAULT_OBSCURE_ADDRESS"
+      value: "Yes"
+    - name: "DEFAULT_PRIVATE_ROSTER"
+      value: "1"
+    - name: "DEFAULT_GENERIC_NONMEMBER_ACTION"
+      value: "1"
+    - name: "DEFAULT_REQUIRE_EXPLICIT_DESTINATION"
+      value: "Yes"
+  when: mailman_hostpublic is defined
+  notify: restart mailman
+- name: Configure mm_cfg for internal mailman
+  become: yes
+  lineinfile:
+    dest: "/etc/mailman/mm_cfg.py"
+    line: "{{ item.name }} = {{ item.value }}"
+    regexp: "^{{ item.name }} "
+  with_items:
+    - name: "DEFAULT_PRIVATE_ROSTER"
+      value: "0"
+    - name: "DEFAULT_GENERIC_NONMEMBER_ACTION"
+      value: "0"
+  when: mailman_hostpublic is not defined
+  notify: restart mailman
+

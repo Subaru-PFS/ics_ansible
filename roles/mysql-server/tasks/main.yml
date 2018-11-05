@@ -1,0 +1,38 @@
+---
+- name: Create directory for database
+  become: yes
+  file:
+    path: "{{ site_config.mysql.data_directory }}"
+    state: directory
+    owner: "mysql"
+    mode: 0700
+- name: Configure mysql server
+  become: yes
+  ini_file:
+    dest: "/etc/mysql/mariadb.conf.d/50-server.cnf"
+    section: "mysqld"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - option: "bind-address"
+      value: "0.0.0.0"
+    - option: slow_query_log_file
+      value: /var/log/mysql/mariadb-slow.log
+    - option: long_query_time
+      value: 1
+    - option: datadir
+      value: "{{ site_config.mysql.data_directory }}"
+  notify: restart mysql
+- name: configure backup for mysql
+  become: yes
+  cron:
+    minute: 10
+    hour: 2
+    job: "{{ site_config.system_dirs.git_clone }}/github.com/Subaru-PFS/pfs_infra_ipmu/admin-script/mysql-backup.sh"
+    cron_file: "/etc/crontab"
+    user: root
+    name: backup-mysql
+  when: install_backup_mysql is defined
+
+
+

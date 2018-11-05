@@ -1,5 +1,8 @@
 ---
 dependencies:
+  - role: packages
+    packages:
+      - daemon
   - role: packagecloud
     packagecloud: 
       target_id: LovooOS/prometheus-exporters
@@ -18,4 +21,11 @@ dependencies:
     when: prometheus_exporters_pgsql is defined
     vars:
       - packages_setup_backport: True
+  - role: packages
+    packages:
+      - "git"
+      - package: prometheus-node-exporter
+        enable_service: prometheus-node-exporter
+    when: hwraid_target_megasas is defined
+
 

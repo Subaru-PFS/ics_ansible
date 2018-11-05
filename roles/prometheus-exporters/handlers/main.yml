@@ -48,5 +48,11 @@
     daemon_reload: yes
     enabled: yes
   become: yes
-
+- name: restart nvidia_gpu_prometheus_exporter
+  systemd:
+    name: nvidia_gpu_prometheus_exporter.service
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes
 

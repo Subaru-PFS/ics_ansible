@@ -10,7 +10,7 @@ site_config:
   git:
     key_file: "~/.ssh/id_rsa"
   grafana:
-    url: "https://pfs.ipmu.jp:3000/grafana/"
+    url: "https://pfs.ipmu.jp/internal/monitors/grafana/"
   httpd:
     sites_git: "git@github.com:/Subaru-PFS/pfs_ipmu_config.git"
   influxdb:
@@ -22,6 +22,8 @@ site_config:
     notice_from: "pfs@pfs.ipmu.jp"
     notice_name: "PFS IPMU System"
     smarthost: "smarthost.pfs.ipmu.jp"
+  mysql:
+    data_directory: "/services/mysql/"
   nfs:
     common:
       - source: "10.100.200.4:/data1"
@@ -242,7 +244,7 @@ site_config:
     localnet: "10.100.200.0/23"
   postgres:
     connect_from: "10.100.200.0/23"
-    data_directory: "/server/services/postgresql/"
+    data_directory: "/services/postgresql/"
     postgres_conf:
       - label: log_min_messages
         value: warning
@@ -252,8 +254,8 @@ site_config:
         value: syslog
   prometheus:
     server: "prometheus"
-    external_url: "https://pfs.ipmu.jp/prometheus/"
-    route_prefix: "/prometheus"
+    external_url: "https://pfs.ipmu.jp/internal/monitors/prometheus/"
+    route_prefix: "/internal/monitors/prometheus"
     log_format: "logger:syslog?appname=prometheus&local=7"
     storage_nfs: "10.100.200.3:/server/services/prometheus"
   prometheus_exporter:
@@ -285,6 +287,7 @@ site_config:
     cache_dir_nfs: "10.100.200.3:/server/services/squid/"
     syslog: "local1.info"
   system_accounts:
+    defuser_groups: "adm,dialout,cdrom,audio,netdev"
     groups:
       - gname: "libvirt-qemu"
         gid: 200
@@ -350,6 +353,10 @@ site_config:
         group: "influxdb"
         home: "/var/lib/influxdb"
         shell: "/bin/false"
+  system_dirs:
+    backup_nfs: "pd2:/server/backup/"
+    backup_dir: "/server/backup/"
+    git_clone: "/usr/local/gitrepo/"
   virt:
     nfsdisk: "10.100.200.3:/virt"
     pki:

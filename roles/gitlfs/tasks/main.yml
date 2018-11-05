@@ -14,7 +14,7 @@
 - name: Download apt-source config file
   become: yes
   get_url:
-    url: "https://packagecloud.io/install/repositories/github/git-lfs/config_file.list?os={{ ansible_os_family }}&dist={{ ansible_distribution_release }}"
+    url: "https://packagecloud.io/install/repositories/github/git-lfs/config_file.list?os={{ ansible_os_family }}&dist={{ ansible_lsb.codename }}"
     dest: /etc/apt/sources.list.d/git-lfs.conf
 - name: Install git-lfs package
   become: yes

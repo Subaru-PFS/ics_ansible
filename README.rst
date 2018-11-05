@@ -47,6 +47,8 @@ configuration parameters and results.
   Install packages, and just execute login (not mount)
 :ldap:
   Configuration of ldap for account
+:mailman:
+  Install mailman and configure mm_cfg
 :mount:
   Mount local attached storage using UUID
 :munin-node:
@@ -137,5 +139,7 @@ Some support files and tools are added in [misc](/misc/) directory, as follows:
   System configurations after installation using built ISO images are assumed 
   to be done by Ansible, preseed configurations are to install bare OS with 
   Ansible to run. 
+:[RHEL/CentOS kickstart](/misc/kickstart/):
+  PFS IPMU test environment installation files.
 
 

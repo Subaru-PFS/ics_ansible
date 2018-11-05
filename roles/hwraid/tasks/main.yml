@@ -1,4 +1,7 @@
 ---
+- name: set fact
+  set_fact:
+    ansible_distribution_release: "{{ ansible_distribution_release if (ansible_distribution_release != 'NA') else 'stretch' }}"
 - name: Add hw-raid apt key
   become: yes
   apt_key:

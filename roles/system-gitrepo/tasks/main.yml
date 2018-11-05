@@ -1,0 +1,17 @@
+---
+- name: Make target directory
+  become: yes
+  file:
+    dest: "{{ site_config.system_dirs.git_clone }}/{{ item.url }}"
+    state: directory
+    mode: "0755"
+  with_items: "{{ system_git_repo_target }}"
+- name: Clone repository (always master)
+  become: yes
+  git:
+    repo: "https://{{ item.url }}.git"
+    dest: "{{ site_config.system_dirs.git_clone }}/{{ item.url }}"
+    update: yes
+    force: yes
+  with_items: "{{ system_git_repo_target }}"
+

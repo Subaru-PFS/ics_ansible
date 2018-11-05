@@ -21,4 +21,10 @@
     password: no
     shell: "{{ item.shell | default(omit) }}"
   with_items: "{{ site_config.system_accounts.users }}"
+- name: Add running account to system groups
+  become: yes
+  user:
+    name: "{{ ansible_ssh_user }}"
+    groups: "{{ site_config.system_accounts.defuser_groups }}"
+    append: yes
 

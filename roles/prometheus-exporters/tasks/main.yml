@@ -136,3 +136,29 @@
   when: prometheus_exporters_jira is defined
   notify: restart prometheus-exporter-sanitizer
 
+- name: Include exporter tasks as nvidia_gpu_prometheus_exporter
+  include: exporter.yml
+  vars:
+    exporter:
+      name: nvidia_gpu_prometheus_exporter
+  when: prometheus_exporters_nvidia_gpu is defined
+  notify: restart nvidia_gpu_prometheus_exporter
+
+- name: Configure megacli text exporter
+  become: yes
+  git:
+    repo: "https://github.com/himorin/megacli2prom.git"
+    dest: /usr/local/src/github/himorin/megacli2prom
+    update: yes
+    force: yes
+  when: hwraid_target_megasas is defined
+- name: Configure cron line for megacli2prom
+  become: yes
+  cron:
+    minute: "*/5"
+    job: "/usr/local/src/github/himorin/megacli2prom/megacli.py > /var/lib/prometheus/node-exporter/megacli.prom"
+    cron_file: "/etc/crontab"
+    user: root
+    name: megacli2prom
+  when: hwraid_target_megasas is defined
+

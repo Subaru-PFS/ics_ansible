@@ -1,0 +1,122 @@
+---
+- name: Make notebook target directory
+  become: yes
+  file:
+    path: "{{ jupyter.directory }}/notebook/"
+    state: directory
+    owner: "{{ ansible_ssh_user }}"
+- name: Generate initial configuration file
+  command: "jupyter-notebook --generate-config --config=\"{{ jupyter.directory }}/{{ jupyter.name }}.py\""
+  args:
+    creates: "{{ jupyter.directory }}/{{ jupyter.name }}.py"
+  changed_when: False
+- name: Configure jupyter notebook config
+  lineinfile:
+    dest: "{{ jupyter.directory }}/{{ jupyter.name }}.py"
+    line: "{{ item.name }} = {{ item.value }}"
+    insertafter: "#{{ item.name }}"
+    regexp: "^{{ item.name }} "
+  with_items:
+    - name: "c.NotebookApp.base_url"
+      value: "'{{ jupyter.base_url }}'"
+    - name: "c.NotebookApp.ip"
+      value: "'0.0.0.0'"
+    - name: "c.NotebookApp.notebook_dir"
+      value: "'{{ jupyter.directory }}/notebook/'"
+    - name: "c.NotebookApp.open_browser"
+      value: "False"
+- name: Check exec_lines block exists
+  command: "grep '^c.InteractiveShellApp.exec_lines' {{ jupyter.directory }}/{{ jupyter.name }}.py"
+  register: task_jupyter_checkexec
+  changed_when: False
+  failed_when: False
+- name: Add exec_lines block if not exists
+  lineinfile:
+    dest: "{{ jupyter.directory }}/{{ jupyter.name }}.py"
+    line: "c.InteractiveShellApp.exec_lines = [ \n ]"
+  when: "'c.InteractiveShellApp.exec_lines' not in task_jupyter_checkexec.stdout"
+- name: Add target directory of sys.path
+  lineinfile:
+    dest: "{{ jupyter.directory }}/{{ jupyter.name }}.py"
+    line: "  'sys.path.append(\"{{ item }}\")', "
+    insertafter: "^c.InteractiveShellApp.exec_lines = "
+  with_items: "{{ jupyter.sys_path }}"
+  when: jupyter.sys_path is defined
+- name: Add cron at-reboot task
+  cron:
+    special_time: reboot
+    job: "jupyter-notebook --config={{ jupyter.directory }}/{{ jupyter.name }}.py  >&- 2>&- &"
+    name: jupyter-start
+
+- name: Install ansible kernel
+  become: yes
+  pip:
+    name: "{{ item }}"
+    executable: pip3
+  with_items:
+    - ansible-kernel
+  when: jupyter.kernel.ansible is defined
+  register: jupyter_kernel_ansible
+- name: Exec ansible kernel install
+  become: yes
+  command: "python3 -m {{ item }}"
+  changed_when: False
+  with_items:
+    - "ansible_kernel.install"
+  when: jupyter_kernel_ansible.changed
+
+- name: Install npm javascript kernel
+  become: yes
+  npm:
+    executable: /usr/bin/npm --unsafe-perm=true --allow-root
+    global: yes
+    name: "{{ item }}"
+  with_items:
+    - "ijavascript"
+  when: jupyter.kernel.javascript is defined
+- name: Run command to configure javascript kernel
+  become: yes
+  command: "ijsinstall --install=global"
+  changed_when: False
+  when: jupyter.kernel.javascript is defined
+
+- name: Install pararell
+  become: yes
+  pip:
+    name: "{{ item }}"
+    executable: pip3
+  with_items:
+    - ipyparallel
+  when: jupyter.kernel.ipcluster is defined
+- name: Configure ipcluster
+  become: yes
+  command: "{{ item }}"
+  changed_when: False
+  with_items:
+    - "ipcluster nbextension enable"
+  when: jupyter.kernel.ipcluster is defined
+- name: Check server_extensions block exists
+  command: "grep '^c.NotebookApp.server_extensions' {{ jupyter.directory }}/{{ jupyter.name }}.py"
+  register: task_jupyter_ipcluster_serverext
+  changed_when: False
+  failed_when: False
+  when: jupyter.kernel.ipcluster is defined
+- name: Add server_extensions block if not exists
+  lineinfile:
+    dest: "{{ jupyter.directory }}/{{ jupyter.name }}.py"
+    line: "c.NotebookApp.server_extensions = [ \n ]"
+  when: jupyter.kernel.ipcluster is defined and "'c.NotebookApp.server_extensions' not in task_jupyter_ipcluster_serverext.stdout and jupyter.kernel.ipcluster is defined"
+- name: Add ipyparallel to server_extensions
+  lineinfile:
+    dest: "{{ jupyter.directory }}/{{ jupyter.name }}.py"
+    line: "  'ipyparallel.nbextension',"
+    insertafter: "^c.NotebookApp.server_extensions = "
+  when: jupyter.kernel.ipcluster is defined
+- name: Create parallel profile
+  command: "ipython3 profile create --parallel --profile={{ jupyter.parallel.profile }}"
+  args:
+    creates: "~/.ipython/profile_{{ jupyter.parallel.profile }}/ipcontroller_config.py"
+  when: jupyter.parallel.profile is defined
+  changed_when: False
+
+

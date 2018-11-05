@@ -1,0 +1,9 @@
+---
+- name: restart mailman
+  systemd:
+    name: mailman.service
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes
+

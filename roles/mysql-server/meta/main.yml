@@ -1,0 +1,24 @@
+---
+dependencies: 
+  - role: packages
+    packages:
+      - mariadb-server
+  - role: packages
+    packages:
+      - mariadb-plugin-mroonga
+    when: mysql_server.mroonga is defined
+  - role: packages
+    packages:
+      - mariadb-plugin-oqgraph
+    when: mysql_server.oqgraph is defined
+  - role: system-gitrepo
+    system_git_repo_target:
+      - url: "github.com/Subaru-PFS/pfs_infra_ipmu"
+    when: install_backup_mysql is defined
+  - role: nfs-client
+    nfsv3_target:
+      - source: "{{ site_config.system_dirs.backup_nfs }}"
+        target: "{{ site_config.system_dirs.backup_dir }}"
+    when: install_backup_mysql is defined
+
+

@@ -1,0 +1,8 @@
+---
+dependencies:
+  - role: packages
+    packages: 
+      - libcuda1
+      - libgomp1
+      - nvidia-cuda-toolkit
+

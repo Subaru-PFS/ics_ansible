@@ -1,3 +1,6 @@
 # command line argument for {{ exporter.name }}
+{% if exporter.opt_args is defined %}
 ARGS="{{ exporter.opt_args | join(" ") }}"
-
+{% else %}
+ARGS=""
+{% endif %}

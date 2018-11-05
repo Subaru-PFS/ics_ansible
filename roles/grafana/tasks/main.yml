@@ -7,18 +7,16 @@
   with_items:
     - apt-transport-https
     - debian-archive-keyring
-- name: Add grafana apt repository
+- name: Download apt-source config file
   become: yes
-  lineinfile:
-    dest: /etc/apt/sources.list
-    line: "deb https://packagecloud.io/grafana/stable/debian/ {{ ansible_distribution_release }} main"
-- name: Download packagecloud GPG key
   get_url:
-    url: "https://packagecloud.io/grafana/stable/gpgkey"
-    dest: "/tmp/packagecloud.gpgkey"
-- name: Add packagecloud GPG key
+    url: "https://packagecloud.io/install/repositories/grafana/stable/config_file.list?os={{ ansible_os_family }}&dist={{ ansible_lsb.codename }}"
+    dest: /etc/apt/sources.list.d/grafana.conf
+- name: Add package cloud apt-key
   become: yes
-  shell: apt-key add /tmp/packagecloud.gpgkey
+  apt_key:
+    url: "https://packagecloud.io/grafana/stable/gpgkey"
+    state: present
 - name: Grafana package
   become: yes
   apt:

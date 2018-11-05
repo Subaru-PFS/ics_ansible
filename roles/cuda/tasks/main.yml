@@ -1,0 +1,20 @@
+---
+- name: Add environment configurations
+  lineinfile:
+    dest: "~/.bashrc"
+    line: "export {{ item.name }}={{ item.value }}"
+    regexp: "^export {{ item.name }}="
+  with_items:
+    - name: CUDA_PATH
+      value: /usr
+    - name: HOST_COMPILER
+      value: gcc
+- name: Copy pg-strom patch
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "0644"
+  with_items:
+    - src: pg-stromm.patch
+      dest: "~/pg-stromm.patch"
+

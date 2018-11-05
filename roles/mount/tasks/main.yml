@@ -14,5 +14,6 @@
     src: "UUID={{ item.source }}"
     fstype: "{{ item.fstype }}"
     passno: 2
+    opts: "{% if item.option is defined %}{{ item.option }}{% else %}defaults{% endif %}"
   with_items: "{{ local_uuids }}"
 
