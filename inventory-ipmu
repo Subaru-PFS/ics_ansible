@@ -57,6 +57,10 @@ all:
                 target: "/admin-res"
         influxdb:
         prometheus:
+        jirapipe-83:
+          nfsv3_target:
+              - source: "10.100.200.3:/server/services/jira-pipe-8.3"
+                target: "/service"
       children:
         pfscalc:
           hosts:
@@ -224,6 +228,8 @@ all:
           prometheus_exporters_es: True
           prometheus_exporters_snmp: True
         jirapipe-77:
+          prometheus_exporters_jira: True        
+        jirapipe-83:
           prometheus_exporters_jira: True        
 
     privca:
